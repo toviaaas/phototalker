@@ -99,13 +99,13 @@
 </div>
 
 <script>
-  const SERVER_URL = "https://12008a31-a8de-40a6-81b4-dfbe5e81297e-00-31oo1r96a9oqu.sisko.replit.dev/generate";
+  // 정확한 엔드포인트로 설정 (백엔드 라우트와 일치)
+  const SERVER_URL = "https://12008a31-a8de-40a6-81b4-dfbe5e81297e-00-31oo1r96a9oqu.sisko.replit.dev/generate_minutes";
 
   const fileInput = document.getElementById("file-input");
   const previewImg = document.getElementById("preview-img");
   const bubble = document.getElementById("bubble");
 
-  // 이미지 미리보기
   fileInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -131,15 +131,30 @@
         body: formData,
       });
 
-      const result = await response.json();
+      // 네트워크 응답이 200이 아닌 경우 에러 처리
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("서버 오류:", response.status, text);
+        bubble.innerText = `❌ 서버 오류: ${response.status}`;
+        return;
+      }
 
-      bubble.innerText = result.caption || "⚠ 응답 형식 오류";
+      const result = await response.json();
+      console.log("서버 응답:", result);
+
+      // 서버가 반환하는 JSON 구조에 맞게 처리
+      if (result.caption) {
+        bubble.innerText = result.caption;
+      } else {
+        // 디버그용: 전체 응답 표시
+        bubble.innerText = JSON.stringify(result);
+      }
       bubble.style.display = "block";
 
     } catch (error) {
+      console.error("Fetch 오류:", error);
       bubble.innerText = "❌ 서버 연결 오류 – 잠시 후 다시 시도해주세요";
       bubble.style.display = "block";
-      console.error(error);
     }
   }
 </script>
