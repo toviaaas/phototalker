@@ -23,8 +23,14 @@
       padding: 20px 0;
       font-size: 2rem;
       font-weight: 800;
+      letter-spacing: 2px;
       border-bottom: 6px solid #ffdd00;
     }
+    h2 {
+      margin-top: 10px;
+      font-weight: 700;
+    }
+
     #upload-area {
       margin-top: 20px;
       padding: 30px;
@@ -34,6 +40,7 @@
       background: white;
       box-shadow: 0 0 0 6px white, 0 0 0 10px black;
     }
+
     .panel {
       border: 6px solid black;
       padding: 20px;
@@ -45,11 +52,13 @@
       align-items: flex-end;
       position: relative;
     }
+
     #preview-img {
       max-width: 100%;
       max-height: 320px;
       display: none;
     }
+
     .speech-bubble {
       display: none;
       position: absolute;
@@ -63,6 +72,7 @@
       border: 4px solid black;
       word-wrap: break-word;
     }
+
     .btn {
       margin-top: 15px;
       padding: 12px 20px;
@@ -77,87 +87,66 @@
 </head>
 <body>
 
-<header>포토토커 PhotoTalker</header>
-<h2>사진이 직접 말한다 – 웃긴 버전부터 판타지 버전까지!</h2>
+  <header>포토토커 PhotoTalker</header>
+  <h2>사진이 직접 말한다 🎤 AI 캡션 생성</h2>
 
-<div id="upload-area">
-  <input type="file" id="file-input" accept="image/*" />
-  <p>📸 사진 업로드</p>
+  <div id="upload-area">
+    <input type="file" id="file-input" accept="image/*" />
+    <p>📸 사진 업로드 (Drag & Drop 또는 파일 선택)</p>
 
-  <div>
-    <label><input type="radio" name="style" value="funny" checked /> 웃김</label>
-    <label><input type="radio" name="style" value="fantasy" /> 판타지</label>
-    <label><input type="radio" name="style" value="random" /> 랜덤</label>
+    <div>
+      <label><input type="radio" name="style" value="funny" checked /> 웃김</label>
+      <label><input type="radio" name="style" value="fantasy" /> 판타지</label>
+      <label><input type="radio" name="style" value="random" /> 랜덤</label>
+    </div>
+
+    <button class="btn" onclick="register()">🪄 대사 생성하기</button>
   </div>
 
-  <button class="btn" onclick="register()">🪄 대사 생성하기</button>
-</div>
+  <div class="panel" id="result-panel">
+    <img id="preview-img" />
+    <div class="speech-bubble" id="bubble">대사가 표시됩니다</div>
+  </div>
 
-<div class="panel" id="result-panel">
-  <img id="preview-img" />
-  <div class="speech-bubble" id="bubble">대사가 표시됩니다</div>
-</div>
+  <script>
+    const SERVER_URL =
+      "https://12008a31-a8de-40a6-81b4-dfbe5e81297e-00-31oo1r96a9oqu.sisko.replit.dev/generate_minutes";
 
-<script>
-  // 정확한 엔드포인트로 설정 (백엔드 라우트와 일치)
-  const SERVER_URL = "https://12008a31-a8de-40a6-81b4-dfbe5e81297e-00-31oo1r96a9oqu.sisko.replit.dev/generate_minutes";
+    const fileInput = document.getElementById("file-input");
+    const previewImg = document.getElementById("preview-img");
+    const bubble = document.getElementById("bubble");
 
-  const fileInput = document.getElementById("file-input");
-  const previewImg = document.getElementById("preview-img");
-  const bubble = document.getElementById("bubble");
-
-  fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      previewImg.src = URL.createObjectURL(file);
-      previewImg.style.display = "block";
-    }
-  });
-
-  async function register() {
-    const styleOption = document.querySelector("input[name='style']:checked").value;
-    const file = fileInput.files[0];
-
-    const formData = new FormData();
-    formData.append("style", styleOption);
-    if (file) formData.append("image", file);
-
-    bubble.innerText = "⏳ 생성 중...";
-    bubble.style.display = "block";
-
-    try {
-      const response = await fetch(SERVER_URL, {
-        method: "POST",
-        body: formData,
-      });
-
-      // 네트워크 응답이 200이 아닌 경우 에러 처리
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("서버 오류:", response.status, text);
-        bubble.innerText = `❌ 서버 오류: ${response.status}`;
-        return;
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        previewImg.src = URL.createObjectURL(file);
+        previewImg.style.display = "block";
       }
+    });
 
-      const result = await response.json();
-      console.log("서버 응답:", result);
+    async function register() {
+      const styleOption = document.querySelector("input[name='style']:checked").value;
+      const file = fileInput.files[0];
 
-      // 서버가 반환하는 JSON 구조에 맞게 처리
-      if (result.caption) {
-        bubble.innerText = result.caption;
-      } else {
-        // 디버그용: 전체 응답 표시
-        bubble.innerText = JSON.stringify(result);
+      const formData = new FormData();
+      formData.append("style", styleOption);
+      if (file) formData.append("image", file);
+
+      try {
+        const response = await fetch(SERVER_URL, {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        bubble.innerText = result.caption || "⚠ 응답 데이터 없음";
+        bubble.style.display = "block";
+      } catch (err) {
+        bubble.innerText = "⚠ 서버 연결 오류 – 잠시 후 다시 시도해주세요";
+        bubble.style.display = "block";
       }
-      bubble.style.display = "block";
-
-    } catch (error) {
-      console.error("Fetch 오류:", error);
-      bubble.innerText = "❌ 서버 연결 오류 – 잠시 후 다시 시도해주세요";
-      bubble.style.display = "block";
     }
-  }
-</script>
+  </script>
 
 </body>
 </html>
