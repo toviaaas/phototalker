@@ -92,7 +92,7 @@
 
   <div id="upload-area">
     <input type="file" id="file-input" accept="image/*" />
-    <p>📸 사진 업로드 (Drag & Drop 또는 파일 선택)</p>
+    <p>📸 사진 업로드 (파일 선택!)</p>
 
     <div>
       <label><input type="radio" name="style" value="funny" checked /> 웃김</label>
@@ -139,10 +139,10 @@
         });
 
         const result = await response.json();
-        bubble.innerText = result.caption || "⚠ 응답 데이터 없음";
+        bubble.innerText = result.caption || "응답 데이터 없음";
         bubble.style.display = "block";
       } catch (err) {
-        bubble.innerText = "⚠ 서버 연결 오류 – 잠시 후 다시 시도해주세요";
+        bubble.innerText = "서버 연결 오류 – 서버야..일해라.";
         bubble.style.display = "block";
       }
     }
@@ -150,4 +150,5 @@
 
 </body>
 </html>
+
 
