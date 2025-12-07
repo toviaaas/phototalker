@@ -109,8 +109,7 @@
   </div>
 
   <script>
-    const SERVER_URL =
-      "https://a5a053cc-03e2-414c-a64a-520d65f47721-00-2z9hwcnumj4e3.sisko.replit.dev/generate_caption";
+    const SERVER_URL = "https://a5a053cc-03e2-414c-a64a-520d65f47721-00-2z9hwcnumj4e3.sisko.replit.dev/generate_caption";
 
     const fileInput = document.getElementById("file-input");
     const previewImg = document.getElementById("preview-img");
@@ -130,7 +129,7 @@
 
       const formData = new FormData();
       formData.append("style", styleOption);
-      if (file) formData.append("image", file);
+      formData.append("image", file);
 
       try {
         const response = await fetch(SERVER_URL, {
@@ -150,6 +149,3 @@
 
 </body>
 </html>
-
-
-
