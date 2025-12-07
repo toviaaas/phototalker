@@ -40,17 +40,19 @@
     padding: 20px;
     margin-top: 10px;
     background: white;
-    min-height: 350px;
+    height: 500px;
     width: 600px;
     position: relative;
+    overflow: hidden;
   }
 
   #preview {
+    display: none;
     position: absolute;
     bottom: 10px;
     left: 10px;
     max-width: 55%;
-    max-height: 300px;
+    max-height: 430px;
     object-fit: contain;
   }
 
@@ -113,7 +115,8 @@
     const file = this.files[0];
     if (!file) return;
     preview.src = URL.createObjectURL(file);
-    bubble.style.display = "none";
+    preview.style.display = "block"; // ⭐ 이미지 확실히 보이게
+    bubble.style.display = "none";   // 업로드 시 말풍선 숨김
   });
 
   async function register() {
@@ -139,13 +142,4 @@
       });
 
       const data = await res.json();
-      bubble.innerText = data.caption || "결과 생성 실패 😢";
-    } catch (e) {
-      console.error(e);
-      bubble.innerText = "오류 발생 ❌ 서버 연결 실패";
-    }
-  }
-</script>
-
-</body>
-</html>
+      bubble.innerText = data.capt
