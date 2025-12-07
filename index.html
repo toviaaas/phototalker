@@ -1,151 +1,47 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>포토토커 (PhotoTalker)</title>
-  
-  <style>
-    body {
-      font-family: "Noto Sans KR", sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+<script>
+  const SERVER_URL =
+    "https://a5a053cc-03e2-414c-a64a-520d65f47721-00-2z9hwcnumj4e3.sisko.replit.dev";
+
+  const fileInput = document.getElementById("file-input");
+  const previewImg = document.getElementById("preview-img");
+  const bubble = document.getElementById("bubble");
+
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      previewImg.src = URL.createObjectURL(file);
+      previewImg.style.display = "block";
     }
-    header {
-      background: black;
-      color: white;
-      width: 100%;
-      padding: 20px 0;
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      border-bottom: 6px solid #ffdd00;
-    }
-    h2 {
-      margin-top: 10px;
-      font-weight: 700;
+  });
+
+  async function register() {
+    const styleOption = document.querySelector("input[name='style']:checked").value;
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert("이미지를 선택하세요!");
+      return;
     }
 
-    #upload-area {
-      margin-top: 20px;
-      padding: 30px;
-      width: 70%;
-      border: 5px solid black;
-      border-radius: 12px;
-      background: white;
-      box-shadow: 0 0 0 6px white, 0 0 0 10px black;
+    const formData = new FormData();
+    formData.append("style", styleOption);
+    formData.append("image", file);
+
+    try {
+      const response = await fetch(`${SERVER_URL}/generate_caption`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log("AI Response:", result);
+
+      bubble.innerText = result.caption || "응답 데이터 없음";
+      bubble.style.display = "block";
+    } catch (err) {
+      console.error(err);
+      bubble.innerText = "서버 연결 오류 – 서버야..일해라.";
+      bubble.style.display = "block";
     }
-
-    .panel {
-      border: 6px solid black;
-      padding: 20px;
-      margin-top: 20px;
-      background: white;
-      min-height: 300px;
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-end;
-      position: relative;
-    }
-
-    #preview-img {
-      max-width: 100%;
-      max-height: 320px;
-      display: none;
-    }
-
-    .speech-bubble {
-      display: none;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      max-width: 50%;
-      padding: 15px 20px;
-      background: white;
-      font-weight: 700;
-      border-radius: 20px;
-      border: 4px solid black;
-      word-wrap: break-word;
-    }
-
-    .btn {
-      margin-top: 15px;
-      padding: 12px 20px;
-      font-size: 1rem;
-      font-weight: 700;
-      border: 4px solid black;
-      background: #ffdd00;
-      cursor: pointer;
-      border-radius: 12px;
-    }
-  </style>
-</head>
-<body>
-
-  <header>포토토커 PhotoTalker</header>
-  <h2>사진이 직접 말한다 🎤 AI 캡션 생성</h2>
-
-  <div id="upload-area">
-    <input type="file" id="file-input" accept="image/*" />
-    <p>📸 사진 업로드 (파일 선택!)</p>
-
-    <div>
-      <label><input type="radio" name="style" value="funny" checked /> 웃김</label>
-      <label><input type="radio" name="style" value="fantasy" /> 판타지</label>
-      <label><input type="radio" name="style" value="random" /> 랜덤</label>
-    </div>
-
-    <button class="btn" onclick="register()">🪄 대사 생성하기</button>
-  </div>
-
-  <div class="panel" id="result-panel">
-    <img id="preview-img" />
-    <div class="speech-bubble" id="bubble">대사가 표시됩니다</div>
-  </div>
-
-  <script>
-    const SERVER_URL = "https://a5a053cc-03e2-414c-a64a-520d65f47721-00-2z9hwcnumj4e3.sisko.replit.dev/generate_caption";
-
-    const fileInput = document.getElementById("file-input");
-    const previewImg = document.getElementById("preview-img");
-    const bubble = document.getElementById("bubble");
-
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        previewImg.src = URL.createObjectURL(file);
-        previewImg.style.display = "block";
-      }
-    });
-
-    async function register() {
-      const styleOption = document.querySelector("input[name='style']:checked").value;
-      const file = fileInput.files[0];
-
-      const formData = new FormData();
-      formData.append("style", styleOption);
-      formData.append("image", file);
-
-      try {
-        const response = await fetch(SERVER_URL, {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await response.json();
-        bubble.innerText = result.caption || "응답 데이터 없음";
-        bubble.style.display = "block";
-      } catch (err) {
-        bubble.innerText = "서버 연결 오류 – 서버야..일해라.";
-        bubble.style.display = "block";
-      }
-    }
-  </script>
-
-</body>
-</html>
+  }
+</script>
