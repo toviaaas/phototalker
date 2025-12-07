@@ -1,47 +1,151 @@
-<script>
-  const SERVER_URL =
-    "https://a5a053cc-03e2-414c-a64a-520d65f47721-00-2z9hwcnumj4e3.sisko.replit.dev";
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>포토토커 (PhotoTalker)</title>
 
-  const fileInput = document.getElementById("file-input");
-  const previewImg = document.getElementById("preview-img");
+<style>
+  body {
+    font-family: 'Pretendard', sans-serif;
+    background: #f0f0f0;
+    margin: 0;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 38px;
+    font-weight: 900;
+    margin-bottom: 10px;
+  }
+
+  .upload-area {
+    border: 4px dashed black;
+    width: 600px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 25px;
+  }
+
+  .panel {
+    border: 6px solid black;
+    padding: 20px;
+    margin-top: 10px;
+    background: white;
+    min-height: 350px;
+    width: 600px;
+    position: relative;
+  }
+
+  #preview {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    max-width: 55%;
+    max-height: 300px;
+    object-fit: contain;
+  }
+
+  .speech-bubble {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    max-width: 40%;
+    min-width: 200px;
+    min-height: 80px;
+    padding: 20px 25px;
+    font-weight: 700;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: none;
+    text-align: center;
+    border: 4px solid black;
+    border-radius: 18px;
+    background: white;
+  }
+
+  button {
+    padding: 12px 22px;
+    font-size: 18px;
+    font-weight: 700;
+    border: 4px solid black;
+    background: white;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+</style>
+</head>
+
+<body>
+  <h1>포토토커 (PhotoTalker)</h1>
+  <p>사진이 직접 말한다 – 웃긴 버전부터 판타지 버전까지!</p>
+
+  <div class="upload-area" onclick="document.getElementById('inputImage').click()">
+    📸 사진 업로드 (Click or Drag & Drop)
+  </div>
+  <input type="file" id="inputImage" accept="image/*" style="display:none;">
+
+  <label><input type="radio" name="style" value="funny"> 웃김</label>
+  <label><input type="radio" name="style" value="fantasy"> 판타지</label>
+  <label><input type="radio" name="style" value="random" checked> 랜덤</label>
+
+  <button onclick="register()">🪄 대사 생성하기</button>
+
+  <div class="panel">
+    <img id="preview"/>
+    <div id="bubble" class="speech-bubble"></div>
+  </div>
+
+<script>
+  const inputImg = document.getElementById("inputImage");
+  const preview = document.getElementById("preview");
   const bubble = document.getElementById("bubble");
 
-  fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      previewImg.src = URL.createObjectURL(file);
-      previewImg.style.display = "block";
-    }
+  inputImg.addEventListener("change", function() {
+    const file = this.files[0];
+    if (!file) return;
+    preview.src = URL.createObjectURL(file);
+    bubble.style.display = "none";
   });
 
   async function register() {
-    const styleOption = document.querySelector("input[name='style']:checked").value;
-    const file = fileInput.files[0];
-
+    const file = inputImg.files[0];
     if (!file) {
-      alert("이미지를 선택하세요!");
+      alert("사진을 먼저 업로드해주세요!");
       return;
     }
 
+    const styleOption = document.querySelector("input[name='style']:checked").value;
+
     const formData = new FormData();
-    formData.append("style", styleOption);
     formData.append("image", file);
+    formData.append("style", styleOption);
+
+    bubble.innerText = "⏳ 생성 중...";
+    bubble.style.display = "block";
 
     try {
-      const response = await fetch(`${SERVER_URL}/generate_caption`, {
+      const res = await fetch("https://c7978a8f-719a-4e66-ab9d-f5fec0b7e03b-00-gxdzr6bxktq2.sisko.replit.dev/generate_caption", {
         method: "POST",
-        body: formData,
+        body: formData
       });
 
-      const result = await response.json();
-      console.log("AI Response:", result);
-
-      bubble.innerText = result.caption || "응답 데이터 없음";
-      bubble.style.display = "block";
-    } catch (err) {
-      console.error(err);
-      bubble.innerText = "서버 연결 오류 – 서버야..일해라.";
-      bubble.style.display = "block";
+      const data = await res.json();
+      bubble.innerText = data.caption || "결과 생성 실패 😢";
+    } catch (e) {
+      console.error(e);
+      bubble.innerText = "오류 발생 ❌ 서버 연결 실패";
     }
   }
 </script>
+
+</body>
+</html>
