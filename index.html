@@ -33,6 +33,7 @@
     cursor: pointer;
     font-size: 18px;
     margin-bottom: 25px;
+    text-align: center;
   }
 
   .panel {
@@ -91,7 +92,7 @@
   <p>사진이 직접 말한다 – 웃긴 버전부터 판타지 버전까지!</p>
 
   <div class="upload-area" onclick="document.getElementById('inputImage').click()">
-    📸 사진 업로드 (Click or Drag & Drop)
+    📸 사진 업로드<br>(Click to upload or Drag & Drop)
   </div>
   <input type="file" id="inputImage" accept="image/*" style="display:none;">
 
@@ -111,14 +112,16 @@
   const preview = document.getElementById("preview");
   const bubble = document.getElementById("bubble");
 
+  // 이미지 선택 시 미리보기 표시
   inputImg.addEventListener("change", function() {
     const file = this.files[0];
     if (!file) return;
     preview.src = URL.createObjectURL(file);
-    preview.style.display = "block"; // ⭐ 이미지 확실히 보이게
-    bubble.style.display = "none";   // 업로드 시 말풍선 숨김
+    preview.style.display = "block";
+    bubble.style.display = "none";
   });
 
+  // 서버 요청
   async function register() {
     const file = inputImg.files[0];
     if (!file) {
@@ -136,10 +139,26 @@
     bubble.style.display = "block";
 
     try {
-      const res = await fetch("https://c7978a8f-719a-4e66-ab9d-f5fec0b7e03b-00-gxdzr6bxktq2.sisko.replit.dev/generate_caption", {
-        method: "POST",
-        body: formData
-      });
+      const res = await fetch(
+        "https://c7978a8f-719a-4e66-ab9d-f5fec0b7e03b-00-gxdzr6bxktq2.sisko.replit.dev/generate_caption",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
 
+      // 서버가 제대로 응답 못하면 여기서 에러남
       const data = await res.json();
-      bubble.innerText = data.capt
+
+      // 백엔드 구조가 caption 키라고 가정
+      bubble.innerText = data.caption || "❗ 응답 오류: 서버가 문장을 보내지 않았어요";
+
+    } catch (err) {
+      console.error("ERROR:", err);
+      bubble.innerText = "⚠️ 서버에서 오류가 발생했습니다!";
+    }
+  }
+</script>
+
+</body>
+</html>
